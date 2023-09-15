@@ -1,1 +1,4 @@
-global using Microsoft.Extensions.Configuration;
+global using Quartz;
+global using CSharpFunctionalExtensions;
+global using Microsoft.Extensions.Logging;
+global using Microsoft.Extensions.DependencyInjection;

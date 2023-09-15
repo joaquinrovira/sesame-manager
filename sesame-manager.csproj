@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Build configuration -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net7.0</TargetFramework>
+  </PropertyGroup>
+  
+  <!-- Project options -->
+  <PropertyGroup>
+    <RootNamespace>sesame_manager</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GlobalUsings>enable</GlobalUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <!-- Dependencies -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
+    <PackageReference Include="Quartz" Version="3.7.0" />
+  </ItemGroup>
+
+</Project>

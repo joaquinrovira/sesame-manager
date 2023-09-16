@@ -6,17 +6,22 @@ public class ExceptionHandler
     IHost Host;
     private ExceptionHandler(IHost host) { Host = host; }
 
-    private async Task UnhandledException(object exception) 
+    private async Task UnhandledException(object error) 
     {
         await Host.StopAsync();
-        if(exception is OptionsValidationException e)
+        if(error is OptionsValidationException OptionsValidationException)
         {
-            Console.Error.WriteLine($"{e.Message}\n{e.StackTrace}");
+            Console.Error.WriteLine($"{OptionsValidationException.Message}\n{OptionsValidationException.StackTrace}");
             Console.Error.WriteLine("");
-            Console.Error.WriteLine($"Configuration validation error caused the application to terminate: {e.Message}\nValidate application settings and try again.");
+            Console.Error.WriteLine($"Configuration validation error caused the application to terminate: {OptionsValidationException.Message}\nValidate application settings and try again.");
+        }
+        else if (error is Exception Exception) {
+            Console.Error.WriteLine($"{Exception.Message}\n{Exception.StackTrace}");
+            Console.Error.WriteLine("");
+            Console.Error.WriteLine($"Unknown error caused application to terminate: {Exception.Message}");
         }
         else {
-            Console.Error.WriteLine(exception.ToString());
+            Console.Error.WriteLine(error.ToString());
             Console.Error.WriteLine("");
             Console.Error.WriteLine("Unknown error caused application to terminate.");
         }

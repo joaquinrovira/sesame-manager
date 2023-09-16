@@ -21,6 +21,7 @@ public static class ServiceCollectionExtensions {
         AutoRegisterFromAssembly(collection, assembly);
         foreach (var a in assemblies) AutoRegisterFromAssembly(collection, a);
     }
+    public static void AutoRegister<T>(this IServiceCollection collection) => AutoRegister(collection, typeof(T).Assembly);
 
     private static void AutoRegisterFromAssembly(IServiceCollection collection, Assembly assembly) 
     {

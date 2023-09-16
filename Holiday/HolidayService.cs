@@ -2,19 +2,24 @@
 
 
 [Service(ServiceLifetime.Singleton)]
-public record class HolidayService (ILogger<HolidayService> Logger, IHolidayProvider HolidayProvider): IHostedService
-{
-    public IReadOnlySet<DateTime> Holidays { get; private set; } = new HashSet<DateTime>();
-
-    public async Task StartAsync(CancellationToken cancellationToken)
-    {
+public record class HolidayService(
+    ILogger<HolidayService> Logger, 
+    IHolidayProvider HolidayProvider, 
+    IHostApplicationLifetime HostApplicationLifetime
+) {
+    public IReadOnlySet<DateTime> Retrieve(int year) {
         Logger.LogInformation("Gathering holday data");
-        // TODO: add backup if provider fails - i.e. add another IHolidayProvider that retrieves alternate holiday calendar from config
-        var result = await HolidayProvider.RetrieveAsync();
-        if (result.IsFailure) throw new Exception("unable to retrieve holiday values");
-        Holidays = (IReadOnlySet<DateTime>) result.Value;
-        Logger.LogInformation("Retrieved the following holidays: \n\t{p}", string.Join("\n\t",Holidays));
+        // TODO: Multiple providers (IEnumerable<IHolidayProvider>) to provide alternatives in case one fails
+        var result = HolidayProvider.Retrieve(year);
+        if(result.IsFailure) TerminateApplication(result.Error);
+        var holidays = result.Value;
+        Logger.LogInformation("Retrieved the following holidays: \n\t{holidays}", string.Join("\n\t", holidays));
+        return holidays;
     }
 
-    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+    private void TerminateApplication(string message) {
+            Logger.LogCritical(message);
+            Environment.ExitCode = 1;
+            HostApplicationLifetime.StopApplication();
+    }
 }

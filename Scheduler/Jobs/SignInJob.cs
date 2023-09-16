@@ -1,6 +1,6 @@
-public class SignOut : IJob
+public class SignInJob : IJob
 {
-    public static readonly JobKey Key = JobUtils.Of<SignOut>();
+    public static readonly JobKey Key = JobUtils.Of<SignInJob>();
     public async Task Execute(IJobExecutionContext context)
     {
         await Console.Out.WriteLineAsync("Greetings from HelloJob!");

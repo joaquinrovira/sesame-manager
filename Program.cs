@@ -4,35 +4,12 @@ var builder = Host.CreateDefaultBuilder(args);
 
 builder.ConfigureServices((hostContext, services) =>
 {
-    services.AddLogging();
-    services.AddHttpClient();
-    services.AutoRegister(typeof(Program).Assembly);
-    services.AddQuartz();
-    // services.AddQuartzHostedService();
-
-    // // see Quartz.Extensions.DependencyInjection documentation about how to configure different configuration aspects
-    // services.AddQuartz(q =>
-    // {
-    //     // your configuration here
-    //     // Register jobs and shit
-    //     q.ScheduleJob<HelloJob>(t => 
-    //         t.StartNow()
-    //         .WithSimpleSchedule(x => 
-    //             x.WithIntervalInSeconds(1)
-    //              .RepeatForever()
-    //         )
-    //     );
-    // });
-
-    // // Quartz.Extensions.Hosting hosting
-    // services.AddQuartzHostedService(options =>
-    // {
-    //     // when shutting down we want jobs to complete gracefully
-    //     options.WaitForJobsToComplete = true;
-    // });
+    services.AddLogging(); // ILogger<T>
+    services.AddHttpClient(); // IHttpClientFactory
+    services.AddQuartz(); // ISchedulerFactory, IJobFactory
+    services.AutoRegister<Program>();
 });
 
-// Register
 using IHost host = builder.Build();
 await host.RunAsync();
 

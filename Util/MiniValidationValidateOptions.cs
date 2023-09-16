@@ -1,6 +1,6 @@
-using Microsoft.Extensions.Options;
 using MiniValidation;
 
+// https://andrewlock.net/validating-nested-dataannotation-options-recursively-with-minivalidation/
 public class MiniValidationValidateOptions<TOptions>
     : IValidateOptions<TOptions> where TOptions : class
 {

@@ -18,7 +18,7 @@ public class ExceptionHandler
         else if (error is Exception Exception) {
             Console.Error.WriteLine($"{Exception.Message}\n{Exception.StackTrace}");
             Console.Error.WriteLine("");
-            Console.Error.WriteLine($"Unknown error caused application to terminate: {Exception.Message}");
+            Console.Error.WriteLine($"Unknown Exception caused application to terminate: {Exception.Message}");
         }
         else {
             Console.Error.WriteLine(error.ToString());

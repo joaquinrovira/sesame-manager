@@ -1,51 +1,78 @@
 using Microsoft.Extensions.Hosting;
+using Quartz.Impl.Matchers;
 
 public record class NextSignInSignOutJob(QuartzHostedService Quartz, ILogger<NextSignInSignOutJob> Logger, IHostApplicationLifetime HostApplicationLifetime) : IJob
 {
     public static readonly JobKey Key = JobUtils.Of<NextSignInSignOutJob>();
     public async Task Execute(IJobExecutionContext context)
     {
-        var t0 = await GetNextFireTimeForJob(Quartz.Scheduler, SignInJob.Key);
-        if(t0.IsFailure) {
-            TerminateApplication(t0.Error);
+        var t0 = await NextFireTime<SignInJob>(Quartz.Scheduler);
+        if (t0.IsFailure)
+        {
+            TerminateApplication(t0.Error.Message);
             return;
         }
 
-        var t1 = await GetNextFireTimeForJob(Quartz.Scheduler, SignOutJob.Key);
-        if(t1.IsFailure) {
-            TerminateApplication(t1.Error);
+        var t1 = await NextFireTime<SignOutJob>(Quartz.Scheduler);
+        if (t1.IsFailure)
+        {
+            TerminateApplication(t1.Error.Message);
             return;
         }
-        Logger.LogInformation("Next execution SignInJob - {t0}\nNext execution SignOutJob - {t1}", t0.Value, t1.Value);
+        Logger.LogInformation("Next execution SignInJob - {t0}\nNext execution SignOutJob - {t1}", t0.Value.ToLocalTime(), t1.Value.ToLocalTime());
 
         // Reschedule for after next SignOutJob is executed
         await context.Scheduler.RescheduleJob(
-            context.Trigger.Key, 
+            context.Trigger.Key,
             TriggerBuilder
                 .Create()
                 .ForJob(context.JobDetail)
-                .WithCronSchedule(t1.Value.AddSeconds(2).AsCron())
+                .WithCronSchedule(t1.Value.AddSeconds(2).DateTime.AsCron())
                 .Build());
     }
 
-    private async Task<Result<DateTime>> GetNextFireTimeForJob(IScheduler Scheduler, JobKey Key)
+    private async Task<Result<DateTimeOffset, Error>> NextFireTime<T>(IScheduler Scheduler) where T:IJob
     {
-        var failure = () => Result.Failure<DateTime>($"Error retrieving next fire time for job '{Key}'");
-        
-        if (!await Scheduler.CheckExists(Key)) return failure();
+        var seed = DateTimeOffset.MaxValue;
+        var time = await FindJobTriggers<T>(Scheduler)
+            .AggregateAsync(seed, (next, tuple) => {
+                var NextFireTime = tuple.Item2.GetNextFireTimeUtc();
+                if(!NextFireTime.HasValue) return next;
+                else if (NextFireTime >= next) return next;
+                return NextFireTime.Value;
+            });
 
-        var triggers = await Scheduler.GetTriggersOfJob(Key);
-        if (triggers.Count == 0) return failure();
+        if(time == seed) {
+            var msg = $"error retrieving next fire time for job '{typeof(T).Name}'";
+            return Result.Failure<DateTimeOffset,Error>(new Error(msg));
+        }
 
-        var nextFireTimeUtc = triggers.First().GetNextFireTimeUtc();
-        if(nextFireTimeUtc is null ) return failure();
-
-        return nextFireTimeUtc.Value.DateTime.ToLocalTime();
+        return time;
     }
 
-    private void TerminateApplication(string message) {
-            Logger.LogCritical(message);
-            Environment.ExitCode = 1;
-            HostApplicationLifetime.StopApplication();
+    private async IAsyncEnumerable<(IJobDetail, ITrigger)> FindJobTriggers<T>(IScheduler Scheduler) {
+        var Type = typeof(T);
+        foreach (var group in await Scheduler.GetJobGroupNames())
+        {
+            var groupMatcher = GroupMatcher<JobKey>.GroupContains(group);
+            foreach (var jobKey in await Scheduler.GetJobKeys(groupMatcher))
+            {
+                var detail = await Scheduler.GetJobDetail(jobKey);
+                if (detail?.JobType != Type) continue;
+
+                var triggers = await Scheduler.GetTriggersOfJob(jobKey);
+                foreach (ITrigger trigger in triggers)
+                {
+                    yield return (detail, trigger);
+                }
+            }
+        }
+    }
+
+    private void TerminateApplication(string message)
+    {
+        Logger.LogCritical(message);
+        Environment.ExitCode = 1;
+        HostApplicationLifetime.StopApplication();
     }
 }

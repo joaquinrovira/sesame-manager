@@ -3,13 +3,13 @@ using System.ComponentModel.DataAnnotations;
 [Config("WeeklySchedule")]
 public class WeeklyScheduleConfig
 {
-    public DayTimeRange? Monday { get; init; }
-    public DayTimeRange? Tuesday { get; init; }
-    public DayTimeRange? Wednesday { get; init; }
-    public DayTimeRange? Thursday { get; init; }
-    public DayTimeRange? Friday { get; init; }
-    public DayTimeRange? Saturday { get; init; }
-    public DayTimeRange? Sunday { get; init; }
+    public WeeklyScheduleItem? Monday { get; init; }
+    public WeeklyScheduleItem? Tuesday { get; init; }
+    public WeeklyScheduleItem? Wednesday { get; init; }
+    public WeeklyScheduleItem? Thursday { get; init; }
+    public WeeklyScheduleItem? Friday { get; init; }
+    public WeeklyScheduleItem? Saturday { get; init; }
+    public WeeklyScheduleItem? Sunday { get; init; }
 
     public IDictionary<DayOfWeek, (TimeOfDay, TimeOfDay)> ToDict() 
     {
@@ -23,15 +23,31 @@ public class WeeklyScheduleConfig
         if (Sunday is not null) dict.Add(DayOfWeek.Sunday, new(new(Sunday.Start!.Hour, Sunday.Start.Hour), new(Sunday.End!.Hour, Sunday.End.Hour)));
         return dict;
     }
+
+    public Maybe<WeeklyScheduleItem> For(DayOfWeek d) {
+        return (d switch
+        {
+            DayOfWeek.Monday => Monday,
+            DayOfWeek.Tuesday => Tuesday,
+            DayOfWeek.Wednesday => Wednesday,
+            DayOfWeek.Thursday => Thursday,
+            DayOfWeek.Friday => Friday,
+            DayOfWeek.Saturday => Saturday,
+            DayOfWeek.Sunday => Sunday,
+            _ => null,
+        }).AsMaybe();
+    }
 }
 
-public class DayTimeRange
+public class WeeklyScheduleItem 
 {
     [Required]
     public DayTimePoint? Start { get; set; }
 
     [Required]
     public DayTimePoint? End { get; set; }
+
+    public string? SignInSite { get; set; }
 }
 
 public class DayTimePoint

@@ -13,10 +13,10 @@ public static class MoreCSharpFunctionalExtensions {
     }
     public static async Task<UnitResult<string>> ToUnitResult<T>(this Task<Result<T>> r) => ToUnitResult(await r);
 
-    public static void SuccessOrThrow(this UnitResult<string> r) 
+    public static void SuccessOrThrow<T>(this UnitResult<T> r) where T:Error
     {
-        if(r.IsFailure) throw new Exception(r.Error);
+        if(r.IsFailure) throw r.Error;
         return;
     }
-    public static async Task SuccessOrThrow(this Task<UnitResult<string>> r) => SuccessOrThrow(await r);
+    public static async Task SuccessOrThrow<T>(this Task<UnitResult<T>> r) where T:Error => SuccessOrThrow(await r);
 }

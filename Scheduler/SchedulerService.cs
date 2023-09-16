@@ -10,20 +10,12 @@ public record class SchedulerService(
     QuartzHostedService Quartz,
     IConfiguration Configuration,
     IOptions<GeneralConfig> GeneralConfig,
-    IOptions<WeeklyScheduleConfig> WeeklyScheduleConfig,
-    IOptions<AdditionalHolidaysConfig> AdditionalHolidaysConfig
+    IOptions<WeeklyScheduleConfig> WeeklyScheduleConfig
 ) : IHostedService
 {
     private IScheduler Scheduler => Quartz.Scheduler; 
 
-    private readonly IReadOnlyDictionary<DayOfWeek, (TimeOfDay, TimeOfDay)> Calendar = new Dictionary<DayOfWeek, (TimeOfDay, TimeOfDay)>()
-    {
-        {DayOfWeek.Monday, (TimeOfDay.HourAndMinuteOfDay(8,30), TimeOfDay.HourAndMinuteOfDay(17,30))},
-        {DayOfWeek.Tuesday, (TimeOfDay.HourAndMinuteOfDay(8,30), TimeOfDay.HourAndMinuteOfDay(17,30))},
-        {DayOfWeek.Wednesday, (TimeOfDay.HourAndMinuteOfDay(8,30), TimeOfDay.HourAndMinuteOfDay(17,30))},
-        {DayOfWeek.Thursday, (TimeOfDay.HourAndMinuteOfDay(8,30), TimeOfDay.HourAndMinuteOfDay(17,30))},
-        {DayOfWeek.Friday, (TimeOfDay.HourAndMinuteOfDay(8,0), TimeOfDay.HourAndMinuteOfDay(14,0))}
-    };
+    private readonly IReadOnlyDictionary<DayOfWeek, (TimeOfDay, TimeOfDay)> Calendar = (IReadOnlyDictionary<DayOfWeek, (TimeOfDay, TimeOfDay)>)WeeklyScheduleConfig.Value.ToDict();
     
     public async Task StartAsync(CancellationToken cancellationToken)
     {

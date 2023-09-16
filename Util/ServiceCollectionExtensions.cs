@@ -26,21 +26,6 @@ public class ServiceAttributeProcessor : AssemblyAttrbiuteProcessor<ServiceAttri
     public static void Apply(IServiceCollection collection, Assembly assembly, params Assembly[] assemblies) 
         => new ServiceAttributeProcessor(collection).AutoRegisterServices(assembly, assemblies);
 
-    protected override void ProcessItem(Type clazz, ServiceAttribute attribute) 
-    {
-        // Register the service with a lifetime as described by the attribute
-        Collection.Add(new(clazz, clazz, attribute.ServiceLifetime));
-
-        // Register the service as all relevant interfaces
-        foreach (var interfaze in RegisterableInterfaces(clazz, attribute)) {
-            Collection.Add(
-                new(
-                    interfaze, 
-                    collection => collection.GetRequiredService(clazz), 
-                    attribute.ServiceLifetime
-            ));
-        }
-    }
 
     // Retrieve registerable interfaces either from attribute or infere them from implemented interfaces
     private static IEnumerable<Type> RegisterableInterfaces(Type clazz, ServiceAttribute attribute) 
@@ -69,5 +54,22 @@ public class ServiceAttributeProcessor : AssemblyAttrbiuteProcessor<ServiceAttri
             var asGeneric = interfaze.GetGenericTypeDefinition();
             return asGeneric == ingoredClass;
         }).Count() == 0;
+    }
+
+    protected override void ProcessItem<T>(ServiceAttribute attribute) => _ProcessItem(typeof(T), attribute);
+    private void _ProcessItem(Type clazz, ServiceAttribute attribute) 
+    {
+        // Register the service with a lifetime as described by the attribute
+        Collection.Add(new(clazz, clazz, attribute.ServiceLifetime));
+
+        // Register the service as all relevant interfaces
+        foreach (var interfaze in RegisterableInterfaces(clazz, attribute)) {
+            Collection.Add(
+                new(
+                    interfaze, 
+                    collection => collection.GetRequiredService(clazz), 
+                    attribute.ServiceLifetime
+            ));
+        }
     }
 }

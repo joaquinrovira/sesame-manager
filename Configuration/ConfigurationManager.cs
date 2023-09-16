@@ -1,6 +1,5 @@
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -13,6 +12,10 @@ public class ConfigAttribute : Attribute
     {
         if (ConfigPath.Length != 0) Section = string.Join(":", ConfigPath);
     }
+}
+
+public interface IConfig {
+    public Maybe<string> Section { get; }
 }
 
 public static class ConfigCollectionExtensions
@@ -37,11 +40,6 @@ public class ConfigAttributeProcessor : AssemblyAttrbiuteProcessor<ConfigAttribu
 
     protected override void ProcessItem<TConfig>(ConfigAttribute attribute) where TConfig : class
     {
-        var section = attribute.Section.Match(
-            Some: section => Configuration.GetSection(section),
-            None: () => Configuration
-        );
-
         Collection.AddOptions<TConfig>()
         .Bind(attribute.Section.Match(
             Some: section => Configuration.GetSection(section),

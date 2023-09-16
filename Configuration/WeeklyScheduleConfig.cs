@@ -1,10 +1,8 @@
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.CodeAnalysis;
 
 [Config("WeeklySchedule")]
 public class WeeklyScheduleConfig
 {
-    [Required]
     public DayTimeRange? Monday { get; init; }
     public DayTimeRange? Tuesday { get; init; }
     public DayTimeRange? Wednesday { get; init; }
@@ -17,10 +15,10 @@ public class WeeklyScheduleConfig
 public class DayTimeRange
 {
     [Required]
-    public DayTimePoint Start { get; set; } = new();
+    public DayTimePoint? Start { get; set; }
 
     [Required]
-    public DayTimePoint End { get; set; } = new();
+    public DayTimePoint? End { get; set; }
 }
 
 public class DayTimePoint

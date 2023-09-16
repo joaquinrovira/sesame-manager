@@ -11,8 +11,7 @@ builder.ConfigureServices((context, services) =>
     services.AutoRegisterConfiguration<Program>(context.Configuration); // Classes with the [Config] attribute
 });
 
-using IHost host = builder.Build();
-await host.RunAsync();
+await ExceptionHandler.Manage(builder, (host) => host.RunAsync());
 
 // No persistence! :)
 

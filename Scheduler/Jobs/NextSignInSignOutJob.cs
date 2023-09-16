@@ -19,7 +19,7 @@ public record class NextSignInSignOutJob(QuartzHostedService Quartz, ILogger<Nex
             TerminateApplication(t1.Error.Message);
             return;
         }
-        Logger.LogInformation("Next execution SignInJob - {t0}\nNext execution SignOutJob - {t1}", t0.Value.ToLocalTime(), t1.Value.ToLocalTime());
+        Logger.LogInformation("Next job triggers\n[SignInJob]  \t{t0}\n[SignOutJob] \t{t1}", t0.Value.ToLocalTime(), t1.Value.ToLocalTime());
 
         // Reschedule for after next SignOutJob is executed
         await context.Scheduler.RescheduleJob(

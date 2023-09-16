@@ -10,7 +10,8 @@ public record class SchedulerService(
     QuartzHostedService Quartz,
     IConfiguration Configuration,
     IOptions<GeneralConfig> GeneralConfig,
-    IOptions<WeeklyScheduleConfig> WeeklyScheduleConfig
+    IOptions<WeeklyScheduleConfig> WeeklyScheduleConfig,
+    LogInRequest LogInRequest
 ) : IHostedService
 {
     private IScheduler Scheduler => Quartz.Scheduler; 
@@ -21,6 +22,7 @@ public record class SchedulerService(
     {
         Logger.LogInformation("Initializing schedule");
         await ConfigureScheduler();
+        await LogInRequest.SignIn();
     }
 
     private async Task ConfigureScheduler()

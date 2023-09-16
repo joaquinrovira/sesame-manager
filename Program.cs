@@ -2,12 +2,13 @@
 
 var builder = Host.CreateDefaultBuilder(args);
 
-builder.ConfigureServices((hostContext, services) =>
+builder.ConfigureServices((context, services) =>
 {
     services.AddLogging(); // ILogger<T>
     services.AddHttpClient(); // IHttpClientFactory
     services.AddQuartz(); // ISchedulerFactory, IJobFactory
-    services.AutoRegister<Program>();
+    services.AutoRegisterServices<Program>(); // Classes with the [Service] attribute
+    services.AutoRegisterConfiguration<Program>(context.Configuration); // Classes with the [Config] attribute
 });
 
 using IHost host = builder.Build();

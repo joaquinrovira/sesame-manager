@@ -1,11 +1,17 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 
 [Service(ServiceLifetime.Singleton)]
 public record class SchedulerService(
     ILogger<SchedulerService> Logger, 
     HolidayService HolidayService, 
-    QuartzHostedService Quartz
+    QuartzHostedService Quartz,
+    IConfiguration Configuration,
+    IOptions<GeneralConfig> GeneralConfig,
+    IOptions<WeeklyScheduleConfig> WeeklyScheduleConfig,
+    IOptions<AdditionalHolidaysConfig> AdditionalHolidaysConfig
 ) : IHostedService
 {
     private IScheduler Scheduler => Quartz.Scheduler; 
@@ -44,9 +50,11 @@ public record class SchedulerService(
             .StartNow()
             .Build());
 
-        // await Scheduler.ScheduleJob(TriggerBuilder.Create().ForJob(PrepareNextYearJob.Key)
-        //     .WithCronSchedule(PrepareNextYearJob.CronExpression(DateTime.Now.Year))
-        //     .Build());
+        await Scheduler.ScheduleJob(TriggerBuilder.Create().ForJob(PrepareNextYearJob.Key)
+            .WithCronSchedule(PrepareNextYearJob.CronExpression(DateTime.Now.Year))
+            .Build());
+
+        if (GeneralConfig.Value.Environment == HostEnvironment.Development)
         await Scheduler.ScheduleJob(TriggerBuilder.Create().ForJob(PrepareNextYearJob.Key)
             .StartNow()
             .Build());

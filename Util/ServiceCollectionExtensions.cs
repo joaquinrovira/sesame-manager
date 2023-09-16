@@ -1,6 +1,4 @@
-using System.Collections.ObjectModel;
 using System.Reflection;
-using CSharpFunctionalExtensions;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -16,37 +14,26 @@ public class ServiceAttribute : Attribute {
 }
 
 public static class ServiceCollectionExtensions {
-    public static void AutoRegister(this IServiceCollection collection, Assembly assembly, params Assembly[] assemblies) 
-    {
-        AutoRegisterFromAssembly(collection, assembly);
-        foreach (var a in assemblies) AutoRegisterFromAssembly(collection, a);
-    }
-    public static void AutoRegister<T>(this IServiceCollection collection) => AutoRegister(collection, typeof(T).Assembly);
+    public static void AutoRegisterServices(this IServiceCollection collection, Assembly assembly, params Assembly[] assemblies) 
+        => ServiceAttributeProcessor.Apply(collection, assembly, assemblies);
+    public static void AutoRegisterServices<T>(this IServiceCollection collection) 
+        => AutoRegisterServices(collection, typeof(T).Assembly);
+}
 
-    private static void AutoRegisterFromAssembly(IServiceCollection collection, Assembly assembly) 
-    {
-        IList<(Type, ServiceAttribute)> services = FindServicesInAssembly(assembly);
-        foreach (var (clazz, attribute) in services) RegisterService(collection, clazz, attribute);
-    }
-    private static IList<(Type, ServiceAttribute)> FindServicesInAssembly(Assembly assembly) 
-    {
-        var result = new List<(Type, ServiceAttribute)>();
-        foreach(var clazz in assembly.GetTypes()) 
-        {
-            var attributes = clazz.GetCustomAttributes<ServiceAttribute>(true);
-            foreach (var attribute in attributes) result.Add((clazz, attribute));
-        }
-        return result;
-    }
+public class ServiceAttributeProcessor : AssemblyAttrbiuteProcessor<ServiceAttribute>
+{
+    private ServiceAttributeProcessor(IServiceCollection collection) : base(collection) { }
+    public static void Apply(IServiceCollection collection, Assembly assembly, params Assembly[] assemblies) 
+        => new ServiceAttributeProcessor(collection).AutoRegisterServices(assembly, assemblies);
 
-    private static void RegisterService(IServiceCollection collection, Type clazz, ServiceAttribute attribute) 
+    protected override void ProcessItem(Type clazz, ServiceAttribute attribute) 
     {
         // Register the service with a lifetime as described by the attribute
-        collection.Add(new(clazz, clazz, attribute.ServiceLifetime));
+        Collection.Add(new(clazz, clazz, attribute.ServiceLifetime));
 
         // Register the service as all relevant interfaces
         foreach (var interfaze in RegisterableInterfaces(clazz, attribute)) {
-            collection.Add(
+            Collection.Add(
                 new(
                     interfaze, 
                     collection => collection.GetRequiredService(clazz), 
@@ -70,7 +57,8 @@ public static class ServiceCollectionExtensions {
     private static readonly Type[] IgnoredTypes = new Type[]
     {
         typeof(IEquatable<>)
-    }; 
+    };
+
 
     private static bool AcceptType(Type interfaze) {
         return IgnoredTypes.Where(ingoredClass => {

@@ -5,14 +5,14 @@ using Microsoft.Extensions.Hosting;
 [Service(ServiceLifetime.Singleton)]
 public record class HolidayService(
     ILogger<HolidayService> Logger, 
-    IHolidayProvider HolidayProvider, 
+    IEnumerable<IHolidayProvider> HolidayProviders, 
     IHostApplicationLifetime HostApplicationLifetime,
     IOptions<AdditionalHolidaysConfig> AdditionalHolidaysConfig
 ) {
     public IReadOnlySet<DateTime> Retrieve(int year) {
         Logger.LogInformation("Gathering holday data");
-        var result = HolidayProvider.Retrieve(year);// TODO: Multiple providers (IEnumerable<IHolidayProvider>) to provide alternatives in case one fails
-        if(result.IsFailure) TerminateApplication(result.Error);
+        var result = RetrieveFromProviders(year);
+        if(result.HasNoValue) TerminateApplication("failed to obtain holiday data from any provider");
         var holidaysRaw = result.Value;
 
         // Include extra holidays from config
@@ -23,6 +23,22 @@ public record class HolidayService(
         var holidays = holidaysRaw.Select(e => new DateTime(year, e.Month, e.Day, 0, 0, 0, DateTimeKind.Local)).ToHashSet();
         Logger.LogInformation("Retrieved holidays: \n\t{holidays}", string.Join("\n\t", holidays.ToImmutableSortedSet()));
         return holidays;
+    }
+
+    // Aggregate data from all providers
+    private record Data(IEnumerable<YearDay> Holidays, bool Failure){}
+    private Maybe<ISet<YearDay>> RetrieveFromProviders(int year) {
+        var process = HolidayProviders
+        .Select(p => p.Retrieve(year))
+        .Aggregate(
+            seed: new Data(new List<YearDay>(), true), 
+            func: (acc, data) => data
+                    .TapError(err => Logger.LogWarning("error retrieving data from holiday provider: {err}", err))
+                    .Map(data => new Data(acc.Holidays.Union(data), false))
+                    .Compensate(_ => Result.Success<Data,Error>(acc)).Value
+        );
+        if (process.Failure) return Maybe.None;
+        return process.Holidays.ToHashSet();
     }
 
     private void TerminateApplication(string message) {

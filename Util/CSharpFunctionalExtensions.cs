@@ -20,3 +20,19 @@ public static class MoreCSharpFunctionalExtensions {
     }
     public static async Task SuccessOrThrow<T>(this Task<UnitResult<T>> r) where T:Error => SuccessOrThrow(await r);
 }
+
+public static class Functional {
+    public static async Task<Result<T,E>> Catch<T, E>(this Func<Task<T>> fn)
+        where E: Exception
+    {
+        try { return await fn(); }
+        catch (E ex) { return ex; }
+    }
+
+    #pragma warning disable CS1998
+    public static Result<T,E> Catch<T, E>(this Func<T> fn) where E: Exception
+        => Catch<T,E>(async () => fn()).GetAwaiter().GetResult();
+    #pragma warning restore CS1998
+    public static Task<Result<T,Error>> Catch<T>(this Func<Task<T>> fn) => Catch<T, Exception>(fn).MapError(Error.From);
+    public static Result<T,Error> Catch<T>(this Func<T> fn) => Catch<T, Exception>(fn).MapError(Error.From);
+}

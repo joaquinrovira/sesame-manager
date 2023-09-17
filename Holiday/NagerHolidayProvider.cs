@@ -5,14 +5,13 @@ public record class NagerHolidayProvider(ILogger<NagerHolidayProvider> Logger, I
 {
     HttpClient HttpClient = HttpClientFactory.CreateClient<NagerHolidayProvider>();
     
-    public Result<ISet<YearDay>> Retrieve(int Year) => RetrieveAsync(Year).GetAwaiter().GetResult();
-    async public Task<Result<ISet<YearDay>>> RetrieveAsync(int Year) {
+    async public Task<Result<ISet<YearDay>,Error>> RetrieveAsync(int Year) {
         // Request data
         var response = await HttpClient.GetAsync($"https://date.nager.at/api/v3/publicholidays/{Year}/ES");
         if (!response.IsSuccessStatusCode) {
             Logger.LogWarning($"error fetching data from https://date.nager.at");
             var body = new StreamReader(await response.Content.ReadAsStreamAsync()).ReadToEnd();
-            return Result.Failure<ISet<YearDay>>(body);
+            return Result.Failure<ISet<YearDay>,Error>(new(body));
         }
 
         // Parse data
@@ -20,7 +19,7 @@ public record class NagerHolidayProvider(ILogger<NagerHolidayProvider> Logger, I
         var result = (await JsonSerializer.DeserializeAsync<HolidayResult[]>(contentStream, new JsonSerializerOptions(){ PropertyNameCaseInsensitive = true })).AsMaybe();
         
         // Filter data
-        return result.ToResult("error desderalizing response from https://date.nager.at")
+        return result.ToResult(new Error("error desderalizing response from https://date.nager.at"))
                     .Map( days => days
                         .Where(d => d.Global || (d.Counties?.Contains("ES-VC") ?? false))
                         .Select(d => {

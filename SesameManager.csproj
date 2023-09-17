@@ -17,6 +17,7 @@
   <!-- Dependencies -->
   <ItemGroup>
     <PackageReference Include="CSharpFunctionalExtensions" Version="2.40.1" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.53" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />

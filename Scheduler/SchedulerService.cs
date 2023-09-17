@@ -87,7 +87,7 @@ public record class SchedulerService(
     private Task RegisterJobWithSite<T>(IScheduler Scheduler, DateTime Date, string? SiteName = null) where T:IJob 
     {
         var t = new DateTimeOffset(Date);
-        Logger.LogInformation("Registering [{type}] \t{date} \tLocation: {site}", typeof(T).Name, t, SiteName ?? "Default");
+        Logger.LogInformation("Registering [{type}]   \t{date} \tLocation: {site}", typeof(T).Name, t, SiteName ?? "Default");
         var job = JobBuilder.Create<T>()
             .UsingJobData(JobDataKeys.Site, SiteName)
             .Build();

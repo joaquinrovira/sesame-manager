@@ -2,12 +2,10 @@ using Microsoft.Extensions.Hosting;
 
 public class ExceptionHandler
 {
-    IHost Host;
-    private ExceptionHandler(IHost host) { Host = host; }
+    private ExceptionHandler() { }
 
-    private async Task UnhandledException(object error)
+    private void UnhandledException(object error)
     {
-        await Host.StopAsync();
         if (error is OptionsValidationException OptionsValidationException)
         {
             Console.Error.WriteLine($"{OptionsValidationException.Message}\n{OptionsValidationException.StackTrace}");
@@ -16,13 +14,17 @@ public class ExceptionHandler
         }
         else if (error is Error Error)
         {
-            Console.Error.WriteLine($"{Error.Message}\n{Error.StackTrace}");
+            Console.Error.WriteLine($"{Error.Message}\n{Error.StackTrace}{Error.ErrorStackTrace}");
             Console.Error.WriteLine("");
             Console.Error.WriteLine($"An error caused the application to terminate: {Error.Message}");
         }
         else if (error is Exception Exception)
         {
-            Console.Error.WriteLine($"{Exception.Message}\n{Exception.StackTrace}");
+            if(Exception.InnerException is Error e) {
+                UnhandledException(e);
+                return;
+            }
+            Console.Error.WriteLine($"{Exception}");
             Console.Error.WriteLine("");
             Console.Error.WriteLine($"Unknown Exception caused the application to terminate: {Exception.Message}");
         }
@@ -37,8 +39,11 @@ public class ExceptionHandler
 
     public static async Task Manage(IHostBuilder Builder, Func<IHost, Task> fn)
     {
-        var host = Builder.Build();
-        try { await fn(host); }
-        catch (Exception e) { await new ExceptionHandler(host).UnhandledException(e); }
+        var Host = Builder.Build();
+        try { await fn(Host); }
+        catch (Exception e) {
+            await Host.StopAsync();
+            new ExceptionHandler().UnhandledException(e); 
+        }
     }
 }

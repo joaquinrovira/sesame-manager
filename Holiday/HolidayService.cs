@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 
 
 [Service(ServiceLifetime.Singleton)]
@@ -9,7 +8,7 @@ public record class HolidayService(
     IHostApplicationLifetime HostApplicationLifetime,
     IOptions<AdditionalHolidaysConfig> AdditionalHolidaysConfig
 ) {
-    public IReadOnlySet<DateTime> Retrieve(int year) {
+    public IReadOnlySet<DateTimeOffset> Retrieve(int year) {
         Logger.LogInformation("Gathering holday data");
         var result = HolidayProvider.Retrieve(year);// TODO: Multiple providers (IEnumerable<IHolidayProvider>) to provide alternatives in case one fails
         if(result.IsFailure) TerminateApplication(result.Error);
@@ -17,10 +16,10 @@ public record class HolidayService(
 
         // Include extra holidays from config
         foreach (var item in AdditionalHolidaysConfig.Value) 
-            holidays.Add(new DateTime(year, item.Month, item.Day));
+            holidays.Add(new DateTimeOffset(new DateTime(year, item.Month, item.Day, 0, 0, 0, DateTimeKind.Local)));
 
         Logger.LogInformation("Retrieved holidays: \n\t{holidays}", string.Join("\n\t", holidays));
-        return (IReadOnlySet<DateTime>)holidays;
+        return (IReadOnlySet<DateTimeOffset>)holidays;
     }
 
     private void TerminateApplication(string message) {

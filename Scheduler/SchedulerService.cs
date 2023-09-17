@@ -42,12 +42,17 @@ public record class SchedulerService(
             .Build());
     }
 
-    public async Task RegisterSignInOut(DateTime? t = null) {
+    public static T Max<T>(T first, T second) {
+        if (Comparer<T>.Default.Compare(first, second) > 0)
+            return first;
+        return second;
+    }
+
+    public async Task RegisterSignInOut(DateTimeOffset? t = null) 
+    {
         // Setup data
-        var Now = DateTime.Now;
-        var Date = t ?? Now.AddDays(1);
-        Date = Now.CompareTo(Date) > 0 ? Now : Date; // NOTE: sanity check - work with dates before today
-        var EndDate = new DateTime(Date.Year + 1, 1, 1);
+        var Date = Max(t,DateTimeOffset.Now.Date.AddDays(1))!.Value;
+        var EndDate = new DateTimeOffset(new DateTime(Date.Year + 1, 1, 1, 0, 0, 0, DateTimeKind.Local));
         var Holidays = HolidayService.Retrieve(Date.Year);
 
         Logger.LogInformation("Registering SignIn and SignOut events for the year {year}.", Date.Year);
@@ -62,7 +67,7 @@ public record class SchedulerService(
             SignInTime = SignInTime.Jitter(300);
             SignOutTime = SignOutTime.Jitter(300);
 
-            var SiteName = WeeklyScheduleConfig.Value.For(Date.DayOfWeek).Map(e => e.SignInSite).GetValueOrDefault();
+            var SiteName = WeeklyScheduleConfig.Value.For(Date.DayOfWeek).Map(e => e.Site).GetValueOrDefault();
 
             await RegisterJobWithSite<SignInJob>(Scheduler, Date.At(SignInTime), SiteName);
             await RegisterJobWithSite<SignOutJob>(Scheduler, Date.At(SignOutTime), SiteName);
@@ -72,9 +77,9 @@ public record class SchedulerService(
         Logger.LogWarning("No jobs have been registered! Check the configuration, perhaps the WeeklySchedule configuration is missing.");
     }
 
-    private Task RegisterJobWithSite<T>(IScheduler Scheduler, DateTime Date, string? SiteName) where T:IJob 
+    private Task RegisterJobWithSite<T>(IScheduler Scheduler, DateTimeOffset Date, string? SiteName) where T:IJob 
     {
-        Logger.LogInformation("[{type}] {date}", typeof(T).Name, Date);
+        Logger.LogInformation("Registering [{type}] \t{date} \tLocation: {site}", typeof(T).Name, Date.ToLocalTime(), SiteName ?? "Default");
         var job = JobBuilder.Create<T>()
             .UsingJobData("Site", SiteName)
             .Build();
@@ -85,11 +90,10 @@ public record class SchedulerService(
     }
 
     private bool IsWeekend(DayOfWeek dow) => dow == DayOfWeek.Saturday || dow == DayOfWeek.Sunday;
-    private bool IsHoliday(DateTime date, IReadOnlySet<DateTime> Holidays) => Holidays.Contains(date.Date);
+    private bool IsHoliday(DateTimeOffset date, IReadOnlySet<DateTimeOffset> Holidays) => Holidays.Contains(date.Date);
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-
         Logger.LogInformation("Terminating scheduler");
         await Scheduler.Shutdown();
     }

@@ -28,5 +28,5 @@ public record class PrepareNextYearJob(
                 .Build());
     }
 
-    public static DateTime StartOfYear(int year) => new DateTime(year, 1, 1);
+    public static DateTime StartOfYear(int year) => new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Local);
 }

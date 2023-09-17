@@ -47,7 +47,7 @@ public class WeeklyScheduleItem
     [Required]
     public DayTimePoint? End { get; set; }
 
-    public string? SignInSite { get; set; }
+    public string? Site { get; set; }
 }
 
 public class DayTimePoint

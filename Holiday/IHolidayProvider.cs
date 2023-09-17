@@ -1,4 +1,4 @@
 public interface IHolidayProvider {
-    Result<ISet<DateTime>> Retrieve(int year);
-    Task<Result<ISet<DateTime>>> RetrieveAsync(int year);
+    Result<ISet<DateTimeOffset>> Retrieve(int year);
+    Task<Result<ISet<DateTimeOffset>>> RetrieveAsync(int year);
 }

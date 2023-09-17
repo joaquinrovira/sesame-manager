@@ -23,10 +23,6 @@ public class GeneralConfig
         }
     }
 
-
-
-
-    public HostEnvironment Environment { get; set; } = HostEnvironment.Development;
 }
 
 public enum HostEnvironment

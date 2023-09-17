@@ -79,7 +79,7 @@ public record class SchedulerService(
         Logger.LogWarning("No jobs have been registered! Check the configuration, perhaps the WeeklySchedule configuration is missing.");
     }
 
-    private Task RegisterJobWithSite<T>(IScheduler Scheduler, DateTime Date, string? SiteName) where T:IJob 
+    private Task RegisterJobWithSite<T>(IScheduler Scheduler, DateTime Date, string? SiteName = null) where T:IJob 
     {
         var t = new DateTimeOffset(Date);
         Logger.LogInformation("Registering [{type}] \t{date} \tLocation: {site}", typeof(T).Name, t, SiteName ?? "Default");

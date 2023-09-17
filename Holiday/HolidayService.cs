@@ -9,10 +9,10 @@ public record class HolidayService(
     IHostApplicationLifetime HostApplicationLifetime,
     IOptions<AdditionalHolidaysConfig> AdditionalHolidaysConfig
 ) {
-    public IReadOnlySet<DateTime> Retrieve(int year) {
+    public Result<IReadOnlySet<DateTime>,Error> Retrieve(int year) {
         Logger.LogInformation("Gathering holday data");
         var result = RetrieveFromProviders(year);
-        if(result.HasNoValue) TerminateApplication("failed to obtain holiday data from any provider");
+        if(result.HasNoValue) return new Error("failed to obtain holiday data from any provider");
         var holidaysRaw = result.Value;
 
         // Include extra holidays from config
@@ -39,11 +39,5 @@ public record class HolidayService(
         );
         if (process.Failure) return Maybe.None;
         return process.Holidays.ToHashSet();
-    }
-
-    private void TerminateApplication(string message) {
-            Logger.LogCritical(message);
-            Environment.ExitCode = 1;
-            HostApplicationLifetime.StopApplication();
     }
 }

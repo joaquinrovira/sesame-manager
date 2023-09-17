@@ -55,7 +55,12 @@ public record class SchedulerService(
         // Setup data
         var Date = Max(t?.DateTime, DateTime.Now.Date.AddDays(1))!.Value;
         var EndDate = new DateTime(Date.Year + 1, 1, 1, 0, 0, 0, DateTimeKind.Local);
-        var Holidays = HolidayService.Retrieve(Date.Year);
+        var resultHolidays = HolidayService.Retrieve(Date.Year);
+        if(resultHolidays.IsFailure) {
+            await Task.FromException(resultHolidays.Error);
+            return;
+        }
+        var Holidays = resultHolidays.Value;
 
         // Register jobs based on holidays and dates
         Logger.LogInformation("Registering SignIn and SignOut events for the year {year}.", Date.Year);

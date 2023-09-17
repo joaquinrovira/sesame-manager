@@ -14,15 +14,20 @@ public class ExceptionHandler
             Console.Error.WriteLine("");
             Console.Error.WriteLine($"Configuration validation error caused the application to terminate: {OptionsValidationException.Message}\nValidate application settings and try again.");
         }
+        else if (error is Error Error) {
+            Console.Error.WriteLine($"{Error.Message}\n{Error.StackTrace}");
+            Console.Error.WriteLine("");
+            Console.Error.WriteLine($"An error caused the application to terminate: {Error.Message}");
+        }
         else if (error is Exception Exception) {
             Console.Error.WriteLine($"{Exception.Message}\n{Exception.StackTrace}");
             Console.Error.WriteLine("");
-            Console.Error.WriteLine($"Unknown Exception caused application to terminate: {Exception.Message}");
+            Console.Error.WriteLine($"Unknown Exception caused the application to terminate: {Exception.Message}");
         }
         else {
             Console.Error.WriteLine(error.ToString());
             Console.Error.WriteLine("");
-            Console.Error.WriteLine("Unknown error caused application to terminate.");
+            Console.Error.WriteLine("Unknown error caused the application to terminate.");
         }
         Environment.Exit(1);
     }

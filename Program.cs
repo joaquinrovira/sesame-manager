@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Hosting;
 
+Console.WriteLine($"Running with TZ={TimeZoneInfo.Local.Id}\n{TimeZoneInfo.Local}");
+
 var builder = Host.CreateDefaultBuilder(args);
 
 builder.ConfigureServices((context, services) =>

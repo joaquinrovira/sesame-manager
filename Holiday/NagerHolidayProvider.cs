@@ -24,11 +24,7 @@ public record class NagerHolidayProvider(ILogger<NagerHolidayProvider> Logger, I
         return result.ToResult(new Error("error desderalizing response from https://date.nager.at"))
                     .Map(days => days
                         .Where(d => d.Global || (d.Counties?.Contains("ES-VC") ?? false))
-                        .Select(d =>
-                        {
-                            var date = d.Date.ToLocalTime().Date;
-                            return new YearDay() { Day = date.Day, Month = date.Month };
-                        })
+                        .Select(d => new YearDay() { Day = d.Date.Day, Month = d.Date.Month })
                         .ToHashSet() as ISet<YearDay>
                     );
     }

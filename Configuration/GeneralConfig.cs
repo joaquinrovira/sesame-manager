@@ -11,7 +11,7 @@ public class GeneralConfig
     public required string Password { get; set; }
 
 
-    private string _TZ = TimeZoneInfo.Utc.Id;
+    private string _TZ = TimeZoneInfo.Local.Id;
     public string TZ
     {
         get => _TZ;

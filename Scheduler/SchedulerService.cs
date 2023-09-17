@@ -10,7 +10,8 @@ public record class SchedulerService(
     QuartzHostedService Quartz,
     IConfiguration Configuration,
     IOptions<GeneralConfig> GeneralConfig,
-    IOptions<WeeklyScheduleConfig> WeeklyScheduleConfig
+    IOptions<WeeklyScheduleConfig> WeeklyScheduleConfig,
+    DateTimeService DateTimeService
 ) : IHostedService
 {
     private IScheduler Scheduler => Quartz.Scheduler;
@@ -39,7 +40,10 @@ public record class SchedulerService(
 
         await Scheduler.AddJob(JobBuilder.Create<PrepareNextYearJob>().WithIdentity(PrepareNextYearJob.Key).Build(), true, true);
         await Scheduler.ScheduleJob(TriggerBuilder.Create().ForJob(PrepareNextYearJob.Key)
-            .WithCronSchedule(PrepareNextYearJob.CronExpression(DateTime.Now.Year))
+            .WithCronSchedule(
+                PrepareNextYearJob.CronExpression(DateTime.Now.Year),
+                e => e.InTimeZone(DateTimeService.TimeZone)
+            )
             .Build());
     }
 
@@ -52,11 +56,11 @@ public record class SchedulerService(
         return second;
     }
 
-    public async Task RegisterSignInOut(DateTimeOffset? t = null)
+    public async Task RegisterSignInOut(DateTime? t = null)
     {
         // Setup data
-        var Date = Max(t?.DateTime, DateTime.Now.Date.AddDays(1))!.Value;
-        var EndDate = new DateTime(Date.Year + 1, 1, 1, 0, 0, 0, DateTimeKind.Local);
+        var Date = Max(t, DateTime.Now.Date.AddDays(1))!.Value;
+        var EndDate = new DateTime(Date.Year + 1, 1, 1);
         var resultHolidays = HolidayService.Retrieve(Date.Year);
         if (resultHolidays.IsFailure)
         {
@@ -89,7 +93,7 @@ public record class SchedulerService(
 
     private Task RegisterJobWithSite<T>(IScheduler Scheduler, DateTime Date, string? SiteName = null) where T : IJob
     {
-        var t = new DateTimeOffset(Date);
+        var t = DateTimeService.Local(Date);
         Logger.LogInformation("Registering [{type}]   \t{date} \tLocation: {site}", typeof(T).Name, t, SiteName ?? "Default");
         var job = JobBuilder.Create<T>()
             .UsingJobData(JobDataKeys.Site, SiteName)

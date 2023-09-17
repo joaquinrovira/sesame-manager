@@ -1,7 +1,11 @@
 using Microsoft.Extensions.Hosting;
-using Quartz.Impl.Matchers;
 
-public record class NextSignInSignOutJob(QuartzHostedService Quartz, ILogger<NextSignInSignOutJob> Logger, IHostApplicationLifetime HostApplicationLifetime) : IJob
+public record class NextSignInSignOutJob(
+    QuartzHostedService Quartz, 
+    ILogger<NextSignInSignOutJob> Logger, 
+    IHostApplicationLifetime HostApplicationLifetime,
+    DateTimeService DateTimeService
+    ) : IJob
 {
     public static readonly JobKey Key = JobUtils.Of<NextSignInSignOutJob>();
     public async Task Execute(IJobExecutionContext context)
@@ -26,7 +30,7 @@ public record class NextSignInSignOutJob(QuartzHostedService Quartz, ILogger<Nex
             TerminateApplication(t2.Error.Message);
             return;
         }
-        Logger.LogInformation("Next job triggers:\n[SignInJob]         \t{t0}\n[SignOutJob]        \t{t1}\n[PrepareNextYearJob] \t{t2}", t0.Value.ToLocalTime(), t1.Value.ToLocalTime(), t2.Value.ToLocalTime());
+        Logger.LogInformation("Next job triggers:\n[SignInJob]         \t{t0}\n[SignOutJob]        \t{t1}\n[PrepareNextYearJob] \t{t2}", DateTimeService.Local(t0.Value), DateTimeService.Local(t1.Value), DateTimeService.Local(t2.Value));
 
         // Reschedule for after next SignOutJob is executed
         await context.Scheduler.RescheduleJob(

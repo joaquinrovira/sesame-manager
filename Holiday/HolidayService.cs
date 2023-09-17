@@ -7,7 +7,8 @@ public record class HolidayService(
     ILogger<HolidayService> Logger,
     IEnumerable<IHolidayProvider> HolidayProviders,
     IHostApplicationLifetime HostApplicationLifetime,
-    IOptions<AdditionalHolidaysConfig> AdditionalHolidaysConfig
+    IOptions<AdditionalHolidaysConfig> AdditionalHolidaysConfig,
+    DateTimeService DateTimeService
 )
 {
     public Result<IReadOnlySet<DateTime>, Error> Retrieve(int year)
@@ -22,7 +23,9 @@ public record class HolidayService(
             if (item is not null)
                 holidaysRaw.Add(item);
 
-        var holidays = holidaysRaw.Select(e => new DateTime(year, e.Month, e.Day, 0, 0, 0, DateTimeKind.Local)).ToHashSet();
+        var holidays = holidaysRaw
+            .Select(e => new DateTime(year, e.Month, e.Day))
+            .ToHashSet();
         Logger.LogInformation("Retrieved holidays: \n\t{holidays}", string.Join("\n\t", holidays.ToImmutableSortedSet()));
         return holidays;
     }

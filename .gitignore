@@ -43,5 +43,5 @@ msbuild.err
 msbuild.wrn
 
 # Build output
-sesame-manager
+SesameManager
 appsettings.json

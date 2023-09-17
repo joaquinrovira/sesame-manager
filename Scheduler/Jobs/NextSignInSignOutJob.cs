@@ -50,23 +50,11 @@ public record class NextSignInSignOutJob(QuartzHostedService Quartz, ILogger<Nex
         return time;
     }
 
-    private async IAsyncEnumerable<(IJobDetail, ITrigger)> FindJobTriggers<T>(IScheduler Scheduler) {
+    private async IAsyncEnumerable<(IJobDetail, ITrigger)> FindJobTriggers<T>(IScheduler Scheduler) 
+    {
         var Type = typeof(T);
-        foreach (var group in await Scheduler.GetJobGroupNames())
-        {
-            var groupMatcher = GroupMatcher<JobKey>.GroupContains(group);
-            foreach (var jobKey in await Scheduler.GetJobKeys(groupMatcher))
-            {
-                var detail = await Scheduler.GetJobDetail(jobKey);
-                if (detail?.JobType != Type) continue;
-
-                var triggers = await Scheduler.GetTriggersOfJob(jobKey);
-                foreach (ITrigger trigger in triggers)
-                {
-                    yield return (detail, trigger);
-                }
-            }
-        }
+        var items = Scheduler.ScheduledJobTriggers(detail => detail?.JobType == Type);
+        await foreach (var item in items) yield return item;
     }
 
     private void TerminateApplication(string message)

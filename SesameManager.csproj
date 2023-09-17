@@ -8,7 +8,7 @@
   
   <!-- Project options -->
   <PropertyGroup>
-    <RootNamespace>sesame_manager</RootNamespace>
+    <RootNamespace>Sesame.Manager</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <GlobalUsings>enable</GlobalUsings>
     <Nullable>enable</Nullable>

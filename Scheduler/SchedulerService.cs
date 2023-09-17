@@ -19,7 +19,7 @@ public record class SchedulerService(
     
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        Logger.LogInformation("Initializing schedule");
+        Logger.LogInformation("Initializing schedule.");
         await ConfigureScheduler();
     }
 
@@ -53,7 +53,7 @@ public record class SchedulerService(
         var EndDate = new DateTime(Date.Year + 1, 1, 1);
         var Holidays = HolidayService.Retrieve(Date.Year);
 
-        Logger.LogInformation("Registering SignIn and SignOut events for the year {year}", Date.Year);
+        Logger.LogInformation("Registering SignIn and SignOut events for the year {year}.", Date.Year);
         // Register jobs based on holidays and dates
         for (; Date < EndDate; Date = Date.AddDays(1))
         {
@@ -70,6 +70,9 @@ public record class SchedulerService(
             await RegisterJobWithSite<SignInJob>(Scheduler, Date.At(SignInTime), SiteName);
             await RegisterJobWithSite<SignOutJob>(Scheduler, Date.At(SignOutTime), SiteName);
         }
+
+        if (!await Scheduler.ScheduledJobTriggers().AnyAsync())
+        Logger.LogWarning("No jobs have been registered! Check the configuration, perhaps the WeeklySchedule configuration is missing.");
     }
 
     private Task RegisterJobWithSite<T>(IScheduler Scheduler, DateTime Date, string? SiteName) where T:IJob 

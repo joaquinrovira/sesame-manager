@@ -26,21 +26,17 @@ public record class SchedulerService(
 
     private async Task ConfigureScheduler()
     {
-        await PreLoadJobs();
         await RegisterSignInOut();
         await RegisterUtilityJobs();
     }
 
-    private async Task PreLoadJobs() {
-        await Scheduler.AddJob(JobBuilder.Create<NextSignInSignOutJob>().WithIdentity(NextSignInSignOutJob.Key).Build(), true, true);
-        await Scheduler.AddJob(JobBuilder.Create<PrepareNextYearJob>().WithIdentity(PrepareNextYearJob.Key).Build(), true, true);
-    }
-
     private async Task RegisterUtilityJobs() {
+        await Scheduler.AddJob(JobBuilder.Create<NextSignInSignOutJob>().WithIdentity(NextSignInSignOutJob.Key).Build(), true, true);
         await Scheduler.ScheduleJob(TriggerBuilder.Create().ForJob(NextSignInSignOutJob.Key)
             .StartNow()
             .Build());
 
+        await Scheduler.AddJob(JobBuilder.Create<PrepareNextYearJob>().WithIdentity(PrepareNextYearJob.Key).Build(), true, true);
         await Scheduler.ScheduleJob(TriggerBuilder.Create().ForJob(PrepareNextYearJob.Key)
             .WithCronSchedule(PrepareNextYearJob.CronExpression(DateTime.Now.Year))
             .Build());

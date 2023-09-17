@@ -38,8 +38,7 @@ public record class SchedulerService(
 
         await Scheduler.AddJob(JobBuilder.Create<PrepareNextYearJob>().WithIdentity(PrepareNextYearJob.Key).Build(), true, true);
         await Scheduler.ScheduleJob(TriggerBuilder.Create().ForJob(PrepareNextYearJob.Key)
-            .StartNow() // TODO: Remove this
-            //.WithCronSchedule(PrepareNextYearJob.CronExpression(DateTime.Now.Year))
+            .WithCronSchedule(PrepareNextYearJob.CronExpression(DateTime.Now.Year))
             .Build());
     }
 

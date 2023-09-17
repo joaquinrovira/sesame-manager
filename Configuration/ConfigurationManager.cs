@@ -14,7 +14,8 @@ public class ConfigAttribute : Attribute
     }
 }
 
-public interface IConfig {
+public interface IConfig
+{
     public Maybe<string> Section { get; }
 }
 

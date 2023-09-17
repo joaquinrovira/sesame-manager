@@ -1,3 +1,3 @@
 namespace SesameApi;
 
-internal record class DataResponse<T>(T Data) {}
+internal record class DataResponse<T>(T Data) { }

@@ -5,22 +5,22 @@ using Microsoft.Extensions.Hosting;
 
 [Service(ServiceLifetime.Singleton)]
 public record class SchedulerService(
-    ILogger<SchedulerService> Logger, 
-    HolidayService HolidayService, 
+    ILogger<SchedulerService> Logger,
+    HolidayService HolidayService,
     QuartzHostedService Quartz,
     IConfiguration Configuration,
     IOptions<GeneralConfig> GeneralConfig,
     IOptions<WeeklyScheduleConfig> WeeklyScheduleConfig
 ) : IHostedService
 {
-    private IScheduler Scheduler => Quartz.Scheduler; 
+    private IScheduler Scheduler => Quartz.Scheduler;
 
     private readonly IReadOnlyDictionary<DayOfWeek, (TimeOfDay, TimeOfDay)> Calendar = (IReadOnlyDictionary<DayOfWeek, (TimeOfDay, TimeOfDay)>)WeeklyScheduleConfig.Value.ToDict();
-    
+
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         Logger.LogInformation("Initializing schedule.");
-        Logger.LogInformation("Running with weekly schedule:\n{schedule}", JsonSerializer.Serialize(WeeklyScheduleConfig.Value, new JsonSerializerOptions(){WriteIndented = true}));
+        Logger.LogInformation("Running with weekly schedule:\n{schedule}", JsonSerializer.Serialize(WeeklyScheduleConfig.Value, new JsonSerializerOptions() { WriteIndented = true }));
         await ConfigureScheduler();
     }
 
@@ -30,7 +30,8 @@ public record class SchedulerService(
         await RegisterUtilityJobs();
     }
 
-    private async Task RegisterUtilityJobs() {
+    private async Task RegisterUtilityJobs()
+    {
         await Scheduler.AddJob(JobBuilder.Create<NextSignInSignOutJob>().WithIdentity(NextSignInSignOutJob.Key).Build(), true, true);
         await Scheduler.ScheduleJob(TriggerBuilder.Create().ForJob(NextSignInSignOutJob.Key)
             .StartNow()
@@ -42,7 +43,8 @@ public record class SchedulerService(
             .Build());
     }
 
-    public static T? Max<T>(T? first, T? second) {
+    public static T? Max<T>(T? first, T? second)
+    {
         if (first is null) return second;
         if (second is null) return first;
         if (Comparer<T>.Default.Compare(first, second) > 0)
@@ -50,13 +52,14 @@ public record class SchedulerService(
         return second;
     }
 
-    public async Task RegisterSignInOut(DateTimeOffset? t = null) 
+    public async Task RegisterSignInOut(DateTimeOffset? t = null)
     {
         // Setup data
         var Date = Max(t?.DateTime, DateTime.Now.Date.AddDays(1))!.Value;
         var EndDate = new DateTime(Date.Year + 1, 1, 1, 0, 0, 0, DateTimeKind.Local);
         var resultHolidays = HolidayService.Retrieve(Date.Year);
-        if(resultHolidays.IsFailure) {
+        if (resultHolidays.IsFailure)
+        {
             await Task.FromException(resultHolidays.Error);
             return;
         }
@@ -81,10 +84,10 @@ public record class SchedulerService(
         }
 
         if (!await Scheduler.ScheduledJobTriggers().AnyAsync())
-        Logger.LogWarning("No jobs have been registered! Check the configuration, perhaps the WeeklySchedule configuration is missing.");
+            Logger.LogWarning("No jobs have been registered! Check the configuration, perhaps the WeeklySchedule configuration is missing.");
     }
 
-    private Task RegisterJobWithSite<T>(IScheduler Scheduler, DateTime Date, string? SiteName = null) where T:IJob 
+    private Task RegisterJobWithSite<T>(IScheduler Scheduler, DateTime Date, string? SiteName = null) where T : IJob
     {
         var t = new DateTimeOffset(Date);
         Logger.LogInformation("Registering [{type}]   \t{date} \tLocation: {site}", typeof(T).Name, t, SiteName ?? "Default");

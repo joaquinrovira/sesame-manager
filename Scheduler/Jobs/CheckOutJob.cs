@@ -1,8 +1,8 @@
 using SesameApi;
 
 public record class CheckOutJob(
-    ILogger<CheckOutJob> Logger, 
-    IOptions<GeneralConfig> GeneralConfig, 
+    ILogger<CheckOutJob> Logger,
+    IOptions<GeneralConfig> GeneralConfig,
     IOptions<WeeklyScheduleConfig> WeeklyScheduleConfig
     ) : IJob
 {

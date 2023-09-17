@@ -11,7 +11,7 @@ public class WeeklyScheduleConfig
     public WeeklyScheduleItem? Saturday { get; init; }
     public WeeklyScheduleItem? Sunday { get; init; }
 
-    public IDictionary<DayOfWeek, (TimeOfDay, TimeOfDay)> ToDict() 
+    public IDictionary<DayOfWeek, (TimeOfDay, TimeOfDay)> ToDict()
     {
         var dict = new Dictionary<DayOfWeek, (TimeOfDay, TimeOfDay)>();
         if (Monday is not null) dict.Add(DayOfWeek.Monday, new(new(Monday.Start!.Hour, Monday.Start.Minute), new(Monday.End!.Hour, Monday.End.Minute)));
@@ -24,7 +24,8 @@ public class WeeklyScheduleConfig
         return dict;
     }
 
-    public Maybe<WeeklyScheduleItem> For(DayOfWeek d) {
+    public Maybe<WeeklyScheduleItem> For(DayOfWeek d)
+    {
         return (d switch
         {
             DayOfWeek.Monday => Monday,
@@ -39,7 +40,7 @@ public class WeeklyScheduleConfig
     }
 }
 
-public class WeeklyScheduleItem 
+public class WeeklyScheduleItem
 {
     [Required]
     public DayTimePoint? Start { get; set; }

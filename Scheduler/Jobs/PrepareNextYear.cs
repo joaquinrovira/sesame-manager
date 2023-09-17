@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Hosting;
 
 public record class PrepareNextYearJob(
-    QuartzHostedService Quartz, 
-    ILogger<PrepareNextYearJob> Logger, 
-    IHostApplicationLifetime HostApplicationLifetime, 
+    QuartzHostedService Quartz,
+    ILogger<PrepareNextYearJob> Logger,
+    IHostApplicationLifetime HostApplicationLifetime,
     SchedulerService SchedulerService
     ) : IJob
 {
@@ -20,7 +20,7 @@ public record class PrepareNextYearJob(
         Logger.LogInformation($"Succesfully configured jobs for next year ({nextYear})");
         Logger.LogInformation($"Rescheduling next {Key} for '{CronExpression(nextYear)}'");
         await context.Scheduler.RescheduleJob(
-            context.Trigger.Key, 
+            context.Trigger.Key,
             TriggerBuilder
                 .Create()
                 .ForJob(context.JobDetail)

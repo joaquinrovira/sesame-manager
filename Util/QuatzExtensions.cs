@@ -2,7 +2,8 @@ using Quartz.Impl.Matchers;
 
 public static class QuartzExtensions
 {
-    public static async IAsyncEnumerable<(IJobDetail, ITrigger)> ScheduledJobTriggers(this IScheduler scheduler, Func<IJobDetail, bool>? filter = null) {
+    public static async IAsyncEnumerable<(IJobDetail, ITrigger)> ScheduledJobTriggers(this IScheduler scheduler, Func<IJobDetail, bool>? filter = null)
+    {
         foreach (var group in await scheduler.GetJobGroupNames())
         {
             var groupMatcher = GroupMatcher<JobKey>.GroupContains(group);

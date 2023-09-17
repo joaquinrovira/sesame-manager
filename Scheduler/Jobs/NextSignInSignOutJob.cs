@@ -38,26 +38,28 @@ public record class NextSignInSignOutJob(QuartzHostedService Quartz, ILogger<Nex
                 .Build());
     }
 
-    private async Task<Result<DateTimeOffset, Error>> NextFireTime<T>(IScheduler Scheduler) where T:IJob
+    private async Task<Result<DateTimeOffset, Error>> NextFireTime<T>(IScheduler Scheduler) where T : IJob
     {
         var seed = DateTimeOffset.MaxValue;
         var time = await FindJobTriggers<T>(Scheduler)
-            .AggregateAsync(seed, (next, tuple) => {
+            .AggregateAsync(seed, (next, tuple) =>
+            {
                 var NextFireTime = tuple.Item2.GetNextFireTimeUtc();
-                if(!NextFireTime.HasValue) return next;
+                if (!NextFireTime.HasValue) return next;
                 else if (NextFireTime >= next) return next;
                 return NextFireTime.Value;
             });
 
-        if(time == seed) {
+        if (time == seed)
+        {
             var msg = $"error retrieving next fire time for job '{typeof(T).Name}'";
-            return Result.Failure<DateTimeOffset,Error>(new Error(msg));
+            return Result.Failure<DateTimeOffset, Error>(new Error(msg));
         }
 
         return time;
     }
 
-    private async IAsyncEnumerable<(IJobDetail, ITrigger)> FindJobTriggers<T>(IScheduler Scheduler) 
+    private async IAsyncEnumerable<(IJobDetail, ITrigger)> FindJobTriggers<T>(IScheduler Scheduler)
     {
         var Type = typeof(T);
         var items = Scheduler.ScheduledJobTriggers(detail => detail?.JobType == Type);

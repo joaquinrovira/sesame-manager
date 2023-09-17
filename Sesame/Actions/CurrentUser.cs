@@ -7,4 +7,4 @@ internal class CurrentUser : ApiActionOnlyResponse<DataResponse<UserInfo[]>>
     protected override string Path() => "/api/v3/security/me";
     public Task<Result<DataResponse<UserInfo[]>, Error>> Do() => Do(HttpMethod.Get);
 }
-public record class UserInfo(string id) {}
+public record class UserInfo(string id) { }

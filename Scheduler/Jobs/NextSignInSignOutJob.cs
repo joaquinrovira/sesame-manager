@@ -6,14 +6,14 @@ public record class NextSignInSignOutJob(QuartzHostedService Quartz, ILogger<Nex
     public static readonly JobKey Key = JobUtils.Of<NextSignInSignOutJob>();
     public async Task Execute(IJobExecutionContext context)
     {
-        var t0 = await NextFireTime<SignInJob>(Quartz.Scheduler);
+        var t0 = await NextFireTime<CheckInJob>(Quartz.Scheduler);
         if (t0.IsFailure)
         {
             TerminateApplication(t0.Error.Message);
             return;
         }
 
-        var t1 = await NextFireTime<SignOutJob>(Quartz.Scheduler);
+        var t1 = await NextFireTime<CheckOutJob>(Quartz.Scheduler);
         if (t1.IsFailure)
         {
             TerminateApplication(t1.Error.Message);

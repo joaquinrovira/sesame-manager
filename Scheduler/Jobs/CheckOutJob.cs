@@ -1,16 +1,16 @@
 using SesameApi;
 
-public record class SignOutJob(
-    ILogger<SignOutJob> Logger, 
+public record class CheckOutJob(
+    ILogger<CheckOutJob> Logger, 
     IOptions<GeneralConfig> GeneralConfig, 
     IOptions<WeeklyScheduleConfig> WeeklyScheduleConfig
     ) : IJob
 {
-    public static readonly JobKey Key = JobUtils.Of<SignOutJob>();
+    public static readonly JobKey Key = JobUtils.Of<CheckOutJob>();
     public async Task Execute(IJobExecutionContext context)
     {
-        var site = context.JobDetail.JobDataMap.GetString("Site");
-        Logger.LogInformation("Signing out from location: {site}", site);
+        var site = context.JobDetail.JobDataMap.GetString(JobDataKeys.Site);
+        Logger.LogInformation("Checking out from location: {site}", site);
         var s = new Sesame(GeneralConfig.Value.Email, GeneralConfig.Value.Password);
         await SesameUtil.CheckInOutInfo(s, site)
             .Tap(e => Logger.LogInformation("Successfully retrieved data: {e}", e))

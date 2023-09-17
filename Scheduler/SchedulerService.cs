@@ -57,8 +57,8 @@ public record class SchedulerService(
         var EndDate = new DateTime(Date.Year + 1, 1, 1, 0, 0, 0, DateTimeKind.Local);
         var Holidays = HolidayService.Retrieve(Date.Year);
 
-        Logger.LogInformation("Registering SignIn and SignOut events for the year {year}.", Date.Year);
         // Register jobs based on holidays and dates
+        Logger.LogInformation("Registering SignIn and SignOut events for the year {year}.", Date.Year);
         for (; Date < EndDate; Date = Date.AddDays(1))
         {
             if (IsWeekend(Date.DayOfWeek)) continue;
@@ -71,8 +71,8 @@ public record class SchedulerService(
 
             var SiteName = WeeklyScheduleConfig.Value.For(Date.DayOfWeek).Map(e => e.Site).GetValueOrDefault();
 
-            await RegisterJobWithSite<SignInJob>(Scheduler, Date.At(SignInTime), SiteName);
-            await RegisterJobWithSite<SignOutJob>(Scheduler, Date.At(SignOutTime), SiteName);
+            await RegisterJobWithSite<CheckInJob>(Scheduler, Date.At(SignInTime), SiteName);
+            await RegisterJobWithSite<CheckOutJob>(Scheduler, Date.At(SignOutTime), SiteName);
         }
 
         if (!await Scheduler.ScheduledJobTriggers().AnyAsync())
@@ -84,7 +84,7 @@ public record class SchedulerService(
         var t = new DateTimeOffset(Date);
         Logger.LogInformation("Registering [{type}] \t{date} \tLocation: {site}", typeof(T).Name, t, SiteName ?? "Default");
         var job = JobBuilder.Create<T>()
-            .UsingJobData("Site", SiteName)
+            .UsingJobData(JobDataKeys.Site, SiteName)
             .Build();
         var trigger = TriggerBuilder.Create()
             .StartAt(t)

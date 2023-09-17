@@ -20,7 +20,7 @@ public record class SchedulerService(
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         Logger.LogInformation("Initializing schedule.");
-        Logger.LogInformation("Running with schedule:\n{schedule}", JsonSerializer.Serialize(WeeklyScheduleConfig.Value, new JsonSerializerOptions(){WriteIndented = true}));
+        Logger.LogInformation("Running with weekly schedule:\n{schedule}", JsonSerializer.Serialize(WeeklyScheduleConfig.Value, new JsonSerializerOptions(){WriteIndented = true}));
         await ConfigureScheduler();
     }
 

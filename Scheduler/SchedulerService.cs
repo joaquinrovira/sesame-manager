@@ -1,6 +1,6 @@
+using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 
 
 [Service(ServiceLifetime.Singleton)]
@@ -20,6 +20,7 @@ public record class SchedulerService(
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         Logger.LogInformation("Initializing schedule.");
+        Logger.LogInformation("Running with schedule:\n{schedule}", JsonSerializer.Serialize(WeeklyScheduleConfig.Value, new JsonSerializerOptions(){WriteIndented = true}));
         await ConfigureScheduler();
     }
 

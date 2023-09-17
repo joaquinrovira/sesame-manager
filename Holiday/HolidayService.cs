@@ -19,7 +19,7 @@ public record class HolidayService(
         foreach (var item in AdditionalHolidaysConfig.Value) 
             holidays.Add(new DateTime(year, item.Month, item.Day));
 
-        Logger.LogInformation("Retrieved the following holidays: \n\t{holidays}", string.Join("\n\t", holidays));
+        Logger.LogInformation("Retrieved holidays: \n\t{holidays}", string.Join("\n\t", holidays));
         return (IReadOnlySet<DateTime>)holidays;
     }
 

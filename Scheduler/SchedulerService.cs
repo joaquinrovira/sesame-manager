@@ -66,8 +66,8 @@ public record class SchedulerService(
             if (!Calendar.ContainsKey(Date.DayOfWeek)) continue;
 
             var (SignInTime, SignOutTime) = Calendar[Date.DayOfWeek];
-            SignInTime = SignInTime.Jitter(300);
-            SignOutTime = SignOutTime.Jitter(300);
+            SignInTime = SignInTime.Jitter(600);
+            SignOutTime = SignOutTime.Jitter(600);
 
             var SiteName = WeeklyScheduleConfig.Value.For(Date.DayOfWeek).Map(e => e.Site).GetValueOrDefault();
 

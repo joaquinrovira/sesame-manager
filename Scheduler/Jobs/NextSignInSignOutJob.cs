@@ -19,7 +19,14 @@ public record class NextSignInSignOutJob(QuartzHostedService Quartz, ILogger<Nex
             TerminateApplication(t1.Error.Message);
             return;
         }
-        Logger.LogInformation("Next job triggers\n[SignInJob]  \t{t0}\n[SignOutJob] \t{t1}", t0.Value.ToLocalTime(), t1.Value.ToLocalTime());
+
+        var t2 = await NextFireTime<PrepareNextYearJob>(Quartz.Scheduler);
+        if (t2.IsFailure)
+        {
+            TerminateApplication(t2.Error.Message);
+            return;
+        }
+        Logger.LogInformation("Next job triggers:\n[SignInJob]         \t{t0}\n[SignOutJob]        \t{t1}\n[PrepareNextYearJob] \t{t2}", t0.Value.ToLocalTime(), t1.Value.ToLocalTime(), t2.Value.ToLocalTime());
 
         // Reschedule for after next SignOutJob is executed
         await context.Scheduler.RescheduleJob(
@@ -27,7 +34,7 @@ public record class NextSignInSignOutJob(QuartzHostedService Quartz, ILogger<Nex
             TriggerBuilder
                 .Create()
                 .ForJob(context.JobDetail)
-                .WithCronSchedule(t1.Value.AddSeconds(2).DateTime.AsCron())
+                .StartAt(t1.Value.AddSeconds(5))
                 .Build());
     }
 

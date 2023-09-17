@@ -38,11 +38,14 @@ public record class SchedulerService(
 
         await Scheduler.AddJob(JobBuilder.Create<PrepareNextYearJob>().WithIdentity(PrepareNextYearJob.Key).Build(), true, true);
         await Scheduler.ScheduleJob(TriggerBuilder.Create().ForJob(PrepareNextYearJob.Key)
-            .WithCronSchedule(PrepareNextYearJob.CronExpression(DateTime.Now.Year))
+            .StartNow() // TODO: Remove this
+            //.WithCronSchedule(PrepareNextYearJob.CronExpression(DateTime.Now.Year))
             .Build());
     }
 
-    public static T Max<T>(T first, T second) {
+    public static T? Max<T>(T? first, T? second) {
+        if (first is null) return second;
+        if (second is null) return first;
         if (Comparer<T>.Default.Compare(first, second) > 0)
             return first;
         return second;
@@ -51,8 +54,8 @@ public record class SchedulerService(
     public async Task RegisterSignInOut(DateTimeOffset? t = null) 
     {
         // Setup data
-        var Date = Max(t,DateTimeOffset.Now.Date.AddDays(1))!.Value;
-        var EndDate = new DateTimeOffset(new DateTime(Date.Year + 1, 1, 1, 0, 0, 0, DateTimeKind.Local));
+        var Date = Max(t?.DateTime, DateTime.Now.Date.AddDays(1))!.Value;
+        var EndDate = new DateTime(Date.Year + 1, 1, 1, 0, 0, 0, DateTimeKind.Local);
         var Holidays = HolidayService.Retrieve(Date.Year);
 
         Logger.LogInformation("Registering SignIn and SignOut events for the year {year}.", Date.Year);
@@ -77,20 +80,21 @@ public record class SchedulerService(
         Logger.LogWarning("No jobs have been registered! Check the configuration, perhaps the WeeklySchedule configuration is missing.");
     }
 
-    private Task RegisterJobWithSite<T>(IScheduler Scheduler, DateTimeOffset Date, string? SiteName) where T:IJob 
+    private Task RegisterJobWithSite<T>(IScheduler Scheduler, DateTime Date, string? SiteName) where T:IJob 
     {
-        Logger.LogInformation("Registering [{type}] \t{date} \tLocation: {site}", typeof(T).Name, Date.ToLocalTime(), SiteName ?? "Default");
+        var t = new DateTimeOffset(Date);
+        Logger.LogInformation("Registering [{type}] \t{date} \tLocation: {site}", typeof(T).Name, t, SiteName ?? "Default");
         var job = JobBuilder.Create<T>()
             .UsingJobData("Site", SiteName)
             .Build();
         var trigger = TriggerBuilder.Create()
-            .WithCronSchedule($"{Date.Second} {Date.Minute} {Date.Hour} {Date.Day} {Date.Month} ? {Date.Year}")
+            .StartAt(t)
             .Build();
         return Scheduler.ScheduleJob(job, trigger);
     }
 
     private bool IsWeekend(DayOfWeek dow) => dow == DayOfWeek.Saturday || dow == DayOfWeek.Sunday;
-    private bool IsHoliday(DateTimeOffset date, IReadOnlySet<DateTimeOffset> Holidays) => Holidays.Contains(date.Date);
+    private bool IsHoliday(DateTime date, IReadOnlySet<DateTime> Holidays) => Holidays.Contains(date.Date);
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {

@@ -43,10 +43,10 @@ public class WeeklyScheduleConfig
 public class WeeklyScheduleItem
 {
     [Required]
-    public DayTimePoint? Start { get; set; }
+    public required DayTimePoint Start { get; set; }
 
     [Required]
-    public DayTimePoint? End { get; set; }
+    public required DayTimePoint End { get; set; }
 
     public string? Site { get; set; }
 }

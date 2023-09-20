@@ -1,14 +1,21 @@
 using System.Text.Json;
 
 [Service(ServiceLifetime.Singleton)]
-public record class NagerHolidayProvider(ILogger<NagerHolidayProvider> Logger, IHttpClientFactory HttpClientFactory) : IHolidayProvider
+public record class NagerHolidayProvider(
+    ILogger<NagerHolidayProvider> Logger, 
+    IHttpClientFactory HttpClientFactory,
+    IOptions<NagerHolidayProviderConfiguration> Config
+) : IHolidayProvider
 {
     HttpClient HttpClient = HttpClientFactory.CreateClient<NagerHolidayProvider>();
+
+    string CountryCode => Config.Value.CountryCode.ToUpperInvariant();
+    Maybe<string> CountyCode => (Config.Value.CountyCode?.ToUpperInvariant()).AsMaybe();
 
     async public Task<Result<ISet<YearDay>, Error>> RetrieveAsync(int Year)
     {
         // Request data
-        var response = await HttpClient.GetAsync($"https://date.nager.at/api/v3/publicholidays/{Year}/ES");
+        var response = await HttpClient.GetAsync($"https://date.nager.at/api/v3/publicholidays/{Year}/{CountryCode}");
         if (!response.IsSuccessStatusCode)
         {
             Logger.LogWarning($"error fetching data from https://date.nager.at");
@@ -23,11 +30,14 @@ public record class NagerHolidayProvider(ILogger<NagerHolidayProvider> Logger, I
         // Filter data
         return result.ToResult(new Error("error desderalizing response from https://date.nager.at"))
                     .Map(days => days
-                        .Where(d => d.Global || (d.Counties?.Contains("ES-VC") ?? false))
+                        .Where(d => d.Global || IsInCounty(d, CountyCode))
                         .Select(d => new YearDay() { Day = d.Date.Day, Month = d.Date.Month })
                         .ToHashSet() as ISet<YearDay>
                     );
     }
+
+    private bool IsInCounty(HolidayResult value, Maybe<string> county)
+        => county.Map(county => value.Counties?.Contains(county) ?? false).GetValueOrDefault(true);
 }
 
 public record HolidayResult(

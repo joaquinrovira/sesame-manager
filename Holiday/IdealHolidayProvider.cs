@@ -1,14 +1,19 @@
 using HtmlAgilityPack;
 
 [Service(ServiceLifetime.Singleton)]
-public record class IdealHolidayProvider(ILogger<IdealHolidayProvider> Logger, IHttpClientFactory HttpClientFactory) : IHolidayProvider
+public record class IdealHolidayProvider(
+    ILogger<IdealHolidayProvider> Logger, 
+    IHttpClientFactory HttpClientFactory,
+    IOptions<IdealHolidayProviderConfiguration> Config
+) : IHolidayProvider
 {
     HttpClient HttpClient = HttpClientFactory.CreateClient<IdealHolidayProvider>();
+    string CalendarPath = Config.Value.CalendarPath.Trim('/');
 
     async public Task<Result<ISet<YearDay>, Error>> RetrieveAsync(int Year)
     {
         // Request data
-        var response = await HttpClient.GetAsync($"https://calendarios.ideal.es/laboral/comunidad-valenciana/valencia/valencia/{Year}");
+        var response = await HttpClient.GetAsync($"https://calendarios.ideal.es/{CalendarPath}/{Year}");
         if (!response.IsSuccessStatusCode)
         {
             Logger.LogWarning($"error fetching data from https://calendarios.ideal.es");

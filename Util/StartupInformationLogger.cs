@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Hosting;
 
 
@@ -44,5 +45,10 @@ public record class StartupInformationLogger(
         public override string ToString() => $"{name}:\n{JSON(value, pretty)}";
         public static implicit operator string(ConfigMessageItem i) => i.ToString();
     }
-    private static string JSON<T>(T value, bool WriteIndented = false) => JsonSerializer.Serialize(value, new JsonSerializerOptions() { WriteIndented = WriteIndented });
+    private static string JSON<T>(T value, bool WriteIndented = false)
+    => JsonSerializer.Serialize(value, new JsonSerializerOptions()
+    {
+        WriteIndented = WriteIndented,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    });
 }

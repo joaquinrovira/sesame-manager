@@ -14,14 +14,7 @@ public record class HolidayService(
     public Result<IReadOnlySet<DateTime>, Error> Retrieve(int year)
     {
         Logger.LogInformation("Gathering holday data");
-        var providerHolidays = RetrieveFromProviders(year);
-
-        // Include extra holidays from config
-        foreach (var item in AdditionalHolidaysConfig.Value)
-            if (item is not null)
-                providerHolidays.Add(item);
-
-        var holidays = providerHolidays
+        var holidays = RetrieveFromProviders(year)
             .Select(e => new DateTime(year, e.Month, e.Day))
             .ToHashSet();
         Logger.LogInformation("Retrieved holidays: \n\t{holidays}", string.Join("\n\t", holidays.ToImmutableSortedSet()));

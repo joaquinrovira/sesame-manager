@@ -12,13 +12,11 @@
 Read the sections below for configuration details. This repository automatically publishes the contents of the main branch to `joaquinrovira/sesame-manager:latest`and includes multi-architecture support for Linux hosts with `amd64`,`arm64` and `arm/v7` architectures. Once configured you can run the reservation agent as follows:
 
 ``` bash
-docker run                                        \
-  -v /path/to/local/config.json:/app/config.json  \
-  --env-file .env                                 \
-  --e Email=YOUR_LOGIN_EMAIL                      \
-  --e Password=YOUR_LOGIN_PASSWORD                \
-  --e WeeklySchedule=`cat schedule.json`          \
-  -e TZ=YOUR_DESIRED_TIMEZONE                     \
+docker run                                                \
+  -e Email=YOUR_LOGIN_EMAIL                               \
+  -e Password=YOUR_LOGIN_PASSWORD                         \
+  -e TZ=YOUR_DESIRED_TIMEZONE                             \
+  -v /path/to/local/appsettings.json:/appappsettings.json \
   joaquinrovira/sesame-manager
 ```
 

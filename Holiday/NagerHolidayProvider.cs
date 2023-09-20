@@ -2,7 +2,7 @@ using System.Text.Json;
 
 [Service(ServiceLifetime.Singleton)]
 public record class NagerHolidayProvider(
-    ILogger<NagerHolidayProvider> Logger, 
+    ILogger<NagerHolidayProvider> Logger,
     IHttpClientFactory HttpClientFactory,
     IOptions<NagerHolidayProviderConfiguration> Config
 ) : IHolidayProvider

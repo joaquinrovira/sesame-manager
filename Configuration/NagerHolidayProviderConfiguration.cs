@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-[Config("HolidayProvider","Nager")]
+[Config("HolidayProvider", "Nager")]
 public class NagerHolidayProviderConfiguration
 {
     public required bool Enabled { get; init; } = true;

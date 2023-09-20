@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Hosting;
 
 public record class NextSignInSignOutJob(
-    QuartzHostedService Quartz, 
-    ILogger<NextSignInSignOutJob> Logger, 
+    QuartzHostedService Quartz,
+    ILogger<NextSignInSignOutJob> Logger,
     IHostApplicationLifetime HostApplicationLifetime,
     DateTimeService DateTimeService
     ) : IJob

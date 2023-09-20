@@ -39,7 +39,8 @@ public record class StartupInformationLogger(
         return builder.ToString();
     }
 
-    private record ConfigMessageItem(string name, object value, bool pretty = false) {
+    private record ConfigMessageItem(string name, object value, bool pretty = false)
+    {
         public override string ToString() => $"{name}:\n{JSON(value, pretty)}";
         public static implicit operator string(ConfigMessageItem i) => i.ToString();
     }

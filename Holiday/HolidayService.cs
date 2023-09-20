@@ -33,7 +33,8 @@ public record class HolidayService(
     private ISet<YearDay> RetrieveFromProviders(int year)
     {
         var cominedHolidays = new HashSet<YearDay>();
-        foreach (var provider in HolidayProviders) {
+        foreach (var provider in HolidayProviders)
+        {
             provider
             .Retrieve(year)
             .TapError(err => Logger.LogWarning("error retrieving data from holiday provider {provider}: {err}", provider.GetType(), err))

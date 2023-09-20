@@ -2,7 +2,7 @@ using HtmlAgilityPack;
 
 [Service(ServiceLifetime.Singleton)]
 public record class IdealHolidayProvider(
-    ILogger<IdealHolidayProvider> Logger, 
+    ILogger<IdealHolidayProvider> Logger,
     IHttpClientFactory HttpClientFactory,
     IOptions<IdealHolidayProviderConfiguration> Config
 ) : IHolidayProvider

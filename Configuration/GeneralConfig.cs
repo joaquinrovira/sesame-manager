@@ -10,7 +10,6 @@ public class GeneralConfig
     [Required]
     public required string Password { get; set; }
 
-
     private string _TZ = TimeZoneInfo.Local.Id;
     public string TZ
     {
@@ -23,10 +22,4 @@ public class GeneralConfig
         }
     }
 
-}
-
-public enum HostEnvironment
-{
-    Development,
-    Production
 }

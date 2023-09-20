@@ -20,7 +20,8 @@ public class ExceptionHandler
         }
         else if (error is Exception Exception)
         {
-            if(Exception.InnerException is Error e) {
+            if (Exception.InnerException is Error e)
+            {
                 UnhandledException(e);
                 return;
             }
@@ -41,9 +42,10 @@ public class ExceptionHandler
     {
         var Host = Builder.Build();
         try { await fn(Host); }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             await Host.StopAsync();
-            new ExceptionHandler().UnhandledException(e); 
+            new ExceptionHandler().UnhandledException(e);
         }
     }
 }

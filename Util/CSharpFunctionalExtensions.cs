@@ -8,12 +8,12 @@ public static class MoreCSharpFunctionalExtensions
         return;
     }
     public static async Task SuccessOrThrow<T>(this Task<UnitResult<T>> r) where T : Error => SuccessOrThrow(await r);
-    public static T GetOrThrow<T,E>(this Result<T,E> r) where E : Error
+    public static T GetOrThrow<T, E>(this Result<T, E> r) where E : Error
     {
         if (r.IsFailure) throw r.Error;
         return r.Value;
     }
-    public static async Task GetOrThrow<T,E>(this Task<Result<T,E>> r) where E : Error => GetOrThrow(await r);
+    public static async Task GetOrThrow<T, E>(this Task<Result<T, E>> r) where E : Error => GetOrThrow(await r);
 }
 
 public static class Functional

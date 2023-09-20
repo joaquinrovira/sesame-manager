@@ -87,7 +87,10 @@ public record class SchedulerService(
         }
 
         if (!await Scheduler.ScheduledJobTriggers().AnyAsync())
-            Logger.LogWarning("No jobs have been registered! Check the configuration, perhaps the WeeklySchedule configuration is missing.");
+        {
+            await Task.FromException(new Error("No jobs have been registered! Check the configuration, perhaps WeeklySchedule configuration is missing."));
+            return;
+        }
     }
 
     private Task RegisterJobWithSite<T>(IScheduler Scheduler, DateTime Date, string? SiteName = null) where T : IJob

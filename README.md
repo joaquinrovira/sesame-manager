@@ -9,9 +9,7 @@
 
 ## 🐋 Running with Docker
 
-> *NOTE:* Work in progress, support for ARMv7 processors
-
-Read the sections below for configuration details. This repository automatically publishes the contents of the main branch to `joaquinrovira/sesame-manager:latest`and includes multi-architecture support for Linux hosts with `amd64`,`arm64` and `arm/v7` architectures. Once configured you can run the reservation agent as follows:
+Read the sections below for configuration details. This repository automatically publishes the contents of the main branch to `joaquinrovira/sesame-manager:latest`and includes multi-architecture support for Linux hosts with `amd64` and `arm64` architectures. Once configured you can run the reservation agent as follows:
 
 ``` bash
 docker run                                                \

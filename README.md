@@ -20,7 +20,7 @@ docker run                                                \
   joaquinrovira/sesame-manager
 ```
 
-> *NOTE:* As this is time-sensitive software, **setting the appropriate timezone is vital**. [More info below](#-configuration).
+> *NOTE:* As this is time-sensitive software, **setting the appropriate timezone is vital**. [More info below](#%EF%B8%8F-configuration).
 
 ## 🏗️ Running the application
 
@@ -56,11 +56,11 @@ Configuration options are read in the following order, from highest to lowest pr
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `Email`              | (*required*) Sesame login email                                                                                                    |
 | `Password`           | (*required*) Sesame login password                                                                                                 |
-| `WeeklySchedule`     | (*required*) Set the weekly check-in/check-out schedule ([more info](#%EF%B8%8F-weekly-schedule))                            |
-| `TZ`                 | (*optional*) Set the application timezone ([more info](#-timezone-configuration))                                                 |
-| `AdditionalHolidays` | (*optional*) Configurable holidays to complement the default holiday providers ([more info](#-additional-holidays-configuration)) |
+| `WeeklySchedule`     | (*required*) Set the weekly check-in/check-out schedule ([more info](#%EF%B8%8F-weekly-schedule))                                  |
+| `TZ`                 | (*optional*) Set the application timezone ([more info](#-timezone))                                                                |
+| `AdditionalHolidays` | (*optional*) Configurable holidays to complement the default holiday providers ([more info](#-additional-holidays))                |
 
-#### 🕒 Timezone configuration
+#### 🕒 Timezone
 
 As this is time-sensitive software, **setting the appropriate timezone is vital**. This is done by configuring the `TZ` variable to a valid value — from the `TZ database name` column of [the following table](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List). The timezone is automatically set to the host's timezone. In linux, you can check out the local machine's timezone with `timedatectl show | grep "^Timezone=.*\$" | cut -d '=' -f2`. Alternatively, it can be set manually to a value like `Asia/Tokyo`.
 

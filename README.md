@@ -20,7 +20,7 @@ docker run                                                \
   joaquinrovira/sesame-manager
 ```
 
-> *NOTE:* As this is time-sensitive software, **setting the appropriate timezone is vital**. [More info below](#🛠️-configuration).
+> *NOTE:* As this is time-sensitive software, **setting the appropriate timezone is vital**. [More info below](#-configuration).
 
 ## 🏗️ Running the application
 
@@ -56,9 +56,9 @@ Configuration options are read in the following order, from highest to lowest pr
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `Email`              | (*required*) Sesame login email                                                                                                    |
 | `Password`           | (*required*) Sesame login password                                                                                                 |
-| `WeeklySchedule`     | (*required*) Set the weekly check-in/check-out schedule ([more info](#🗓️-weekly-schedule-configuration))                            |
-| `TZ`                 | (*optional*) Set the application timezone ([more info](#🕒-timezone-configuration))                                                 |
-| `AdditionalHolidays` | (*optional*) Configurable holidays to complement the default holiday providers ([more info](#🎄-additional-holidays-configuration)) |
+| `WeeklySchedule`     | (*required*) Set the weekly check-in/check-out schedule ([more info](#%EF%B8%8F-weekly-schedule))                            |
+| `TZ`                 | (*optional*) Set the application timezone ([more info](#-timezone-configuration))                                                 |
+| `AdditionalHolidays` | (*optional*) Configurable holidays to complement the default holiday providers ([more info](#-additional-holidays-configuration)) |
 
 #### 🕒 Timezone configuration
 
@@ -111,14 +111,14 @@ There are two holiday providers currently implemented, [Nager](https://date.nage
 
 | Variable                              | Description                                                                                                                        |
 | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `HolidayProvider__Nager__CountryCode` | (*required*) (e.g., `ES`) The two letter country codes from Nager API - (a list can be found here)[https://date.nager.at/Country]  |
-| `HolidayProvider__Nager__CountyCode`  | (*optional*) (e.g., `ES-AN`) The longer county code used to also retrieve the specific holidays for a given county                 |
+| `HolidayProvider:Nager:CountryCode` | (*required*) (e.g., `ES`) The two letter country codes from Nager API - (a list can be found here)[https://date.nager.at/Country]  |
+| `HolidayProvider:Nager:CountyCode`  | (*optional*) (e.g., `ES-AN`) The longer county code used to also retrieve the specific holidays for a given county                 |
 
 #### Ideal
 
 | Variable                              | Description                                                                                                                        |
 | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `HolidayProvider__Ideal__CalendarPath` | (*required*) The path to the specific calendar regional calendar  |
+| `HolidayProvider:Ideal:CalendarPath` | (*required*) The path to the specific calendar regional calendar  |
 
 > *NOTE: the `CalendarPath` is obtained from https://calendarios.ideal.es. Navigate to your desired yearly calendar and retrieve the path as follows. Given an example calendar url, https://calendarios.ideal.es/laboral/castilla-la-mancha/ciudad-real/tomelloso/2023, `CalendarPath` here is the url segments between `ideal.es/` and `/2023`, i.e., `laboral/castilla-la-mancha/ciudad-real/tomelloso`.*
 

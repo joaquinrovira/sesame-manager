@@ -128,5 +128,5 @@ As there is no official public API, the application may break at any time. Pull 
 
 ## ⚠️ Disclaimer
 
-The Sesame **does not authorize** the use of this program. This has been published for **educational purposes only**. 
+Sesame **does not authorize** the use of this program. This has been published for **educational purposes only**. 
 
